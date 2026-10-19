@@ -14,7 +14,7 @@ DSH（DeepSeek Harness）Web UI 的纯客户端插件：**官方右侧栏原生�
 > 兼容性：DSH Web 0.1.x ~ 0.2.x（依赖官方 `sidebarRightTabs` 服务与 `sidebar.right.pane.tab` 槽位；在 0.2.1-rc.2 上验证）。纯客户端 bundle，无 npm 依赖。
 
 - **任务进度清单** — 当前会话的 todo 投影（`projectionValues.todos`，兼容数组与 `{items}` 两种形态），`in_progress → pending → completed` 排序；进度条 + "已完成 N / 共 M" + "进行中 X · 待办 Y" 计数；会话不具备该能力（键缺失）时面板隐藏。
-- **子代理运行状态** — 当前会话的直接子代理（`origin === "subagent"` 且 `parentId === current`）；每行展示**模型芯片、token 用量、轮次/步数、上下文占用%、耗时**（读取 0.2.1 的 `tokenUsage` / `sessionStats` / `contextPressure` / `subagentTiming` / `modelSelection` / `subagent.label` 投影）；运行中置顶、其余按更新时间倒序；超过 8 行分页"显示其余 N 个"；点击经 `subagentAddress` → `openSubagent` 跳转；面板可见时 `setSubagentCatalogOpen` 订阅目录推送 + 手动刷新。
+- **子代理运行状态** — 当前会话的直接子代理（`origin === "subagent"` 且 `parentId === current`）；每行展示**模型芯片、token 用量、轮次/步数、上下文占用%、耗时**（读取 0.2.1 的 `tokenUsage` / `sessionStats` / `contextPressure` / `subagentTiming` / `modelSelection` / `subagent.label` 投影）；运行中置顶、其余按更新时间倒序；超过 8 行分页"显示其余 N 个"；点击经 `subagentAddress` → `uiWorkspace.openSession` 跳转（旧宿主回退 `sessions.openSubagent`）；面板可见时 `setSubagentCatalogOpen` 订阅目录推送 + 手动刷新。
 - **后台运行任务** — 0.2.1 `jobs` 服务快照（`state.rows[sessionId]` + `watchRows`），live（running/stopping）置顶并每秒刷新已运行时长，展示 **progress 进度行**（`JobView.progress`）或终止原因（`detail`）；支持**两段式终止**（`ctx.jobs.kill(sessionId, jobId)`，先点击待确认、3 秒内再点执行）；settled 折叠进"历史"分区。
 
 ## 文件
