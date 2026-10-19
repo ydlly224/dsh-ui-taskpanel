@@ -1,10 +1,12 @@
 # dsh-ui-taskpanel
 
-DSH（DeepSeek Harness）Web UI 的纯客户端插件：在 UI 右侧浮层（`shell.overlay` slot）加一个可折叠抽屉，聚合当前会话的三类运行信息。
+DSH（DeepSeek Harness）Web UI 的纯客户端插件：**官方右侧栏原生标签页「任务面板」**（`sidebarRightTabs` 注册类型 + `sidebar.right.pane.tab` 槽位，与「工作区文件/浏览器/终端」同一套 dock 体验：可拖拽分栏、全屏、宽度拖拽、会话级布局记忆），聚合当前会话的三类运行信息。
 
-- **任务进度清单** — 当前会话的 todo 投影（`projectionValues.todos`），`in_progress → pending → completed` 排序，含 "已完成 N / 共 M" 进度条。会话不具备该能力（键缺失）时整个面板不渲染。
-- **子代理运行状态** — 当前会话的直接子代理（summmaries 中 `origin === "subagent"` 且 `parentId === current`），运行态旋转图标、待交互琥珀点、完成绿点；行点击经 `subagentAddress` → `openSubagent` 跳转；面板可见时通过 `setSubagentCatalogOpen` 订阅目录推送，头部含 `indexSubagentDescendants` 汇总与手动刷新。
-- **后台运行任务** — 当前会话的 `jobsBySession` 快照，纯展示：live（running/stopping）置顶并每秒显示已运行时长（仅存在 live 任务时起计时器），settled 折叠进"历史"分区。
+> 兼容性：DSH Web 0.1.x ~ 0.2.x（依赖官方 `sidebarRightTabs` 服务与 `sidebar.right.pane.tab` 槽位；在 0.2.1-rc.2 上验证）。纯客户端 bundle，无 npm 依赖。
+
+- **任务进度清单** — 当前会话的 todo 投影（`projectionValues.todos`，兼容数组与 `{items}` 两种形态），`in_progress → pending → completed` 排序；进度条 + "已完成 N / 共 M" + "进行中 X · 待办 Y" 计数；会话不具备该能力（键缺失）时面板隐藏。
+- **子代理运行状态** — 当前会话的直接子代理（`origin === "subagent"` 且 `parentId === current`）；每行展示**模型芯片、token 用量、轮次/步数、上下文占用%、耗时**（读取 0.2.1 的 `tokenUsage` / `sessionStats` / `contextPressure` / `subagentTiming` / `modelSelection` / `subagent.label` 投影）；运行中置顶、其余按更新时间倒序；超过 8 行分页"显示其余 N 个"；点击经 `subagentAddress` → `openSubagent` 跳转；面板可见时 `setSubagentCatalogOpen` 订阅目录推送 + 手动刷新。
+- **后台运行任务** — 0.2.1 `jobs` 服务快照（`state.rows[sessionId]` + `watchRows`），live（running/stopping）置顶并每秒刷新已运行时长，展示 **progress 进度行**（`JobView.progress`）或终止原因（`detail`）；支持**两段式终止**（`ctx.jobs.kill(sessionId, jobId)`，先点击待确认、3 秒内再点执行）；settled 折叠进"历史"分区。
 
 ## 文件
 
@@ -15,19 +17,25 @@ DSH（DeepSeek Harness）Web UI 的纯客户端插件：在 UI 右侧浮层（`s
 | `lib/index.js` | host 加载器入口 stub（`apply()` 为空） |
 | `lib/client.js` | 浏览器 bundle：手写 CJS 工厂（`window.__ModuleLoader__.load`），导出 `apply` / `inject` |
 
-## 安装（参考，本仓库不代执行）
+## 安装
 
-把本目录 compose 进 profile `~/.dsh/profiles/web` 后由 DSH client-modules 子系统提供服务，浏览器加载 `lib/client.js`。
-
+```bash
+# 1) 安装包（本地目录或 Git 仓库；GitHub 简写亦可）
 dsh plugin --profile web add file:<本插件目录>
-（新增 loader entry 后需重启 dsh web 并刷新页面；此后仅改 lib/client.js 会自动 HMR 热重载）
+#   或：dsh plugin --profile web add git+https://github.com/ydlly224/dsh-ui-taskpanel.git
+```
+
+2) 在 `~/.dsh/profiles/web/package.json` 的 `dsh.profile.bundles` 数组里追加 `"dsh-ui-taskpanel"`（pnpm 已把依赖写入 `dependencies`，注册 bundle 需手动加一行）；
+3) 重启一次 dsh web，浏览器刷新后在右侧栏「+ 新标签页 → 任务面板」打开；此后仅改 `lib/client.js` 会自动 HMR 热重载。
+
+纯客户端插件：无 npm 依赖、不发起网络请求、不写除 `localStorage["dsh.taskpanel.v4"]` 之外的本机持久化。
 
 ## 行为细节
 
-- 抽屉根节点 `position:absolute; top/right/bottom:0; pointer-events:auto`，只覆盖抽屉自身宽度，不遮挡下方应用（overlay 层本身 `pointer-events:none`）。
-- 折叠态为 48px 竖条（展开按钮 + 活跃徽标：in_progress todo 数 + 运行中子代理数 + live 任务数的合计）；展开态默认 340px，左侧 4px 点击折叠条 + 6px 拖拽手柄，宽度可调 280–560px。
-- 状态持久化到 `localStorage["dsh.taskpanel.v1"]`：`{ collapsed, width, panels: { todos, subagents, jobs } }`，读写均有 try/catch 兜底。
-- 主题只使用经核实的 `--dsw-alias-*` CSS 变量（`bg-layer-1` / `label-*` / `border-l2` / `state-*-primary` / `brand-primary` 等），暗色主题自动生效；容器背景为 `color-mix` 半透明 + `backdrop-filter: blur(12px)`，并保留不透明兜底声明。
+- 面板为填充式布局（`.dsh-tp-panel-root` height:100% flex 列），宽度/分栏/全屏/标签页开关全部由官方 dockkit 提供；入口为右侧栏「+ 新标签页 → 任务面板」，标签页按会话记忆。
+- 面板数据范围：待办清单、子代理运行状态、后台运行任务；标签页归属会话即数据来源会话（`props.sessionId`）。
+- 面板分区开关持久化到 `localStorage["dsh.taskpanel.v4"]`：`{ panels: { todos, subagents, jobs } }`，读写均有 try/catch 兜底。
+- 主题只使用经核实的 `--dsw-alias-*` CSS 变量（`bg-layer-1` / `label-*` / `border-l2` / `state-*-primary` / `brand-primary` 等），暗色主题自动生效；面板底色随官方 dock 面板（`bg-base`），不再自带半透明/模糊容器。
 - CSS 经 `<style data-plugin="dsh-ui-taskpanel" data-plugin-css="dsh-ui-taskpanel/taskpanel.css">` 注入，HMR 卸载标签后重载会重新注入。
 - 所有快照选取器只返回原语或存量引用（数组/对象派生一律走 `useMemo`），避免 `useSyncExternalStoreWithSelector` 的引用不稳定循环。
 - 所有文案走 `t()`（NS=`taskpanel`，zh 为键集真源），动态字符串一律以 React 文本节点渲染。

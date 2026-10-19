@@ -1,17 +1,27 @@
 {
   "name": "dsh-ui-taskpanel",
   "version": "0.1.0",
-  "description": "DSH web UI right-side task panel: todos, subagents, background jobs (pure client plugin)",
+  "engines": {
+    "node": ">=18.0.0",
+    "dsh": ">=0.1.0-rc.8 <0.3.0"
+  },
+  "description": "DSH web UI right-sidebar native tab: todos, subagents, background jobs (pure client plugin)",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
-    ".": { "default": "./lib/index.js" },
-    "./client": { "default": "./lib/client.js" },
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
     "./package.json": "./package.json"
   },
   "license": "MIT",
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "inject": [
         "@deepseek-ai/dsh-client-locale",
@@ -20,5 +30,28 @@
       ],
       "platform": "web"
     }
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "dsh-client",
+    "sidebar",
+    "task"
+  ],
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ydlly224/dsh-ui-taskpanel.git"
+  },
+  "homepage": "https://github.com/ydlly224/dsh-ui-taskpanel#readme",
+  "bugs": {
+    "url": "https://github.com/ydlly224/dsh-ui-taskpanel/issues"
   }
 }
