@@ -1,5 +1,14 @@
 # dsh-ui-taskpanel
 
+<p align="center">
+  <a href="https://github.com/ydlly224/dsh-ui-taskpanel"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-ydlly224%2Fdsh-ui-taskpanel-181717?logo=github"></a>
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
+  <img alt="DSH" src="https://img.shields.io/badge/DSH-0.1.x%20~%200.2.x-8A2BE2">
+  <a href="https://github.com/topics/dsh-plugin"><img alt="dsh-plugin" src="https://img.shields.io/badge/topic-dsh--plugin-blueviolet"></a>
+</p>
+
+<p align="center"><img src="docs/screenshot.png" width="360" alt="sidebar tab screenshot"></p>
+
 DSH（DeepSeek Harness）Web UI 的纯客户端插件：**官方右侧栏原生标签页「任务面板」**（`sidebarRightTabs` 注册类型 + `sidebar.right.pane.tab` 槽位，与「工作区文件/浏览器/终端」同一套 dock 体验：可拖拽分栏、全屏、宽度拖拽、会话级布局记忆），聚合当前会话的三类运行信息。
 
 > 兼容性：DSH Web 0.1.x ~ 0.2.x（依赖官方 `sidebarRightTabs` 服务与 `sidebar.right.pane.tab` 槽位；在 0.2.1-rc.2 上验证）。纯客户端 bundle，无 npm 依赖。
@@ -46,3 +55,11 @@ dsh plugin --profile web add file:<本插件目录>
 node --check lib/index.js   # 通过
 node --check lib/client.js  # 通过
 ```
+
+## English
+
+A pure client-side plugin for [DeepSeek Harness](https://github.com/deepseek-ai) Web UI: registers a **native right-sidebar tab** (`sidebarRightTabs`) — a **Task Panel** tab that shows todo progress, subagent status (model, tokens, turns, context) and background jobs (progress + two-step terminate).
+
+- Repo: https://github.com/ydlly224/dsh-ui-taskpanel
+- Install: `dsh plugin --profile web add git+https://github.com/ydlly224/dsh-ui-taskpanel.git`, then register the bundle name in `~/.dsh/profiles/web/package.json` → `dsh.profile.bundles`, restart dsh web and refresh.
+- Extends: DSH Web 0.1.x ~ 0.2.x (verified on 0.2.1-rc.2); pure client bundle, zero dependencies.
