@@ -11,7 +11,7 @@
 
 DSH（DeepSeek Harness）Web UI 的纯客户端插件：**官方右侧栏原生标签页「任务面板」**（`sidebarRightTabs` 注册类型 + `sidebar.right.pane.tab` 槽位，与「工作区文件/浏览器/终端」同一套 dock 体验：可拖拽分栏、全屏、宽度拖拽、会话级布局记忆），聚合当前会话的三类运行信息。
 
-> 兼容性：DSH Web 0.1.x ~ 0.2.x（依赖官方 `sidebarRightTabs` 服务与 `sidebar.right.pane.tab` 槽位；在 **0.2.1-rc.5** 上完整实测通过：待办进度、子代理列表与导航、后台任务列表渲染均正常）。纯客户端 bundle，无 npm 依赖。
+> 兼容性：DSH Web 0.1.x ~ 0.2.x（依赖官方 `sidebarRightTabs` 服务与 `sidebar.right.pane.tab` 槽位；已在 **0.2.1-rc.5** 与 **0.2.2-rc.1** 上完整实测通过：待办进度、子代理列表与导航、后台任务列表渲染均正常；0.2.2-rc.1 连续多日实际使用无异常）。纯客户端 bundle，无 npm 依赖。
 
 - **任务进度清单** — 当前会话的 todo 投影（`projectionValues.todos`，兼容数组与 `{items}` 两种形态），`in_progress → pending → completed` 排序；进度条 + "已完成 N / 共 M" + "进行中 X · 待办 Y" 计数；会话不具备该能力（键缺失）时面板隐藏。
 - **子代理运行状态** — 当前会话的直接子代理（`origin === "subagent"` 且 `parentId === current`）；每行展示**模型芯片、token 用量、轮次/步数、上下文占用%、耗时**（读取 0.2.1 的 `tokenUsage` / `sessionStats` / `contextPressure` / `subagentTiming` / `modelSelection` / `subagent.label` 投影）；运行中置顶、其余按更新时间倒序；超过 8 行分页"显示其余 N 个"；**默认点击在右侧栏打开子代理会话**（官方原生 `subagentchat` 资源：`dsh-resource://subagentchat/session/<childSessionId>?parent=…&mode=…`，经 `sidebarRight.openResource(resource, { kind: "subagentchat", preferNewPane: true })`，与官方 `openChildAside` 同款），**Alt/⌘ 点击在主视图打开**；回退链 `openSubagentAside` → `uiWorkspace.openSession`（旧宿主回退 `sessions.openSubagent`）；面板可见时 `setSubagentCatalogOpen` 订阅目录推送 + 手动刷新。
@@ -62,4 +62,4 @@ A pure client-side plugin for [DeepSeek Harness](https://github.com/deepseek-ai)
 
 - Repo: https://github.com/ydlly224/dsh-ui-taskpanel
 - Install: `dsh plugin --profile web add git+https://github.com/ydlly224/dsh-ui-taskpanel.git`, then register the bundle name in `~/.dsh/profiles/web/package.json` → `dsh.profile.bundles`, restart dsh web and refresh.
-- Extends: DSH Web 0.1.x ~ 0.2.x (verified on **0.2.1-rc.5**: todo progress, subagent list + navigation, background-job list all render correctly); pure client bundle, zero dependencies.
+- Extends: DSH Web 0.1.x ~ 0.2.x (verified on **0.2.1-rc.5** and **0.2.2-rc.1**: todo progress, subagent list + navigation, background-job list all render correctly; zero issues across several days of real use on 0.2.2-rc.1); pure client bundle, zero dependencies.
